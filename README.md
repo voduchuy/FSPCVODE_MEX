@@ -1,6 +1,6 @@
 # FSPCVODE_MEX
 
-Codes for building Matlab interface with Sundials's CVODES library using Mex.
+Codes for building Matlab interface with Sundials's CVODES library using Mex. These codes target only initial value problems of the form dx/dt = A(t)*x.
 
 Prerequisites:
 - CMake.
