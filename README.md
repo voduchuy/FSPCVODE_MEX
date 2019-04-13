@@ -15,7 +15,7 @@ To build (using command line):
 - Open Matlab, run the script 'build_mex_files.m'.
 - The Mex solver is ready to use. For more information, see the comments in "FspCVodeMex.c".
 
-Advance options:
+Advanced options:
 1) Build with OpenMP support:
 - The library can optionally use Sundials' OpenMP support (provided that this was enabled for your Sundials build). To enable OpenMP, instead of "cmake..", type
 
