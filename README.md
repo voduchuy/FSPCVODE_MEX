@@ -12,7 +12,7 @@ To build (using command line):
 - Change directory (via, e.g, cd) to "build".
 - Type "cmake ..".
 - Type "make". The C source files are compiled into shared libraries.
-- Open Matlab, run the script 'build_mex_files.m'.
+- Open Matlab, run the script 'BuildMexFiles.m'.
 - The Mex solver is ready to use. For more information, see the comments in "FspCVodeMex.c".
 
 Advanced options:
