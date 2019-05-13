@@ -72,7 +72,7 @@ int FspCVode( int n_tspan, double *tspan, int n_state, double *p0, matvecfun mat
     CVODECHKERR( cvode_stat );
 
     /* Create the linear solver without preconditioning */
-    linear_solver = SUNSPFGMR( p_nv, PREC_NONE, 30 );
+    linear_solver = SUNSPFGMR( p_nv, PREC_NONE, 50 );
     //    linear_solver = SUNSPBCGS( p_nv, PREC_NONE, 0 );
     cvode_stat = CVSpilsSetLinearSolver( cvode_mem, linear_solver );
     CVODECHKERR( cvode_stat );
@@ -92,7 +92,7 @@ int FspCVode( int n_tspan, double *tspan, int n_state, double *p0, matvecfun mat
 
         /* Check if we have to terminate early */
         stop_fun( tspan[ i ], p_nv_dat, stop_mem, &istop );
-        if ( istop ) {
+        if ( istop == 1 ) {
             break;
         }
 
