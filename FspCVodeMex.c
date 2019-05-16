@@ -268,9 +268,6 @@ mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray	*prhs[])
     size_t n_state = mxGetNumberOfElements(prhs[2]);
     plhs[0] = mxCreateCellMatrix(n_tspan, 1);
 
-    printf("Evaluating for %d time points with %d states.\n",
-            n_tspan, n_state);
-    
     struct f_out_ml_dat fout_dat;
     struct f_stop_ml_dat fstop_dat;
     struct mv_ml_dat mv_dat;
@@ -284,13 +281,16 @@ mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray	*prhs[])
     p0_ptr = (double*)mxGetPr(prhs[2]);
     tspan = (double*)mxGetPr(prhs[0]);
     
-    printf("Calling ODE solver...\n");
+//     printf("Evaluating for %d time points with %d states.\n",
+//             n_tspan, n_state);
+//     
+//     printf("Calling ODE solver...\n");
     int ierr = FspCVode( n_tspan, tspan, n_state, p0_ptr, &mex_matvec, (void*) &mv_dat, &mex_out_fun, (void*) &fout_dat, &mex_stop_fun, (void*) &fstop_dat);
-    printf("Returning from ODE solver...Error code = %d\n", ierr);
-
-    printf("Matvec time: %.2e \n", mv_dat.cput );
-    printf("FOut time: %.2e \n", fout_dat.cput);
-    printf("FStop time %.2e \n", fstop_dat.cput);
+//     printf("Returning from ODE solver...Error code = %d\n", ierr);
+// 
+//     printf("Matvec time: %.2e \n", mv_dat.cput );
+//     printf("FOut time: %.2e \n", fout_dat.cput);
+//     printf("FStop time %.2e \n", fstop_dat.cput);
 
     plhs[1] = mxDuplicateArray(fstop_dat.stop_status);
 

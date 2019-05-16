@@ -20,7 +20,6 @@
 
 #include <sundials/sundials_types.h>       /* defs. of realtype, sunindextype      */
 #include <sundials/sundials_math.h>        /* defs. of SUNRabs, SUNRexp, etc.      */
-#include <nvector/nvector_parallel.h>
 #ifndef NDEBUG
 #define CVODECHKERR( flag ){\
     if (flag < 0) \

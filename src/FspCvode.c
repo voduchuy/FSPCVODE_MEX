@@ -24,7 +24,6 @@ where the functions to evaluate the Jacobian action and the partial derivatives 
 */
 int FspCVode( int n_tspan, double *tspan, int n_state, double *p0, matvecfun matvec, void *matvecdat, outputfun out_fun,
               void *out_mem, stoppingfun stop_fun, void *stop_mem ) {
-    printf( "Calling solver\n" );
     /* CVODEs error code */
     int cvode_stat;
     /* CVODE error tolerances */
@@ -97,7 +96,6 @@ int FspCVode( int n_tspan, double *tspan, int n_state, double *p0, matvecfun mat
         }
 
         out_fun( i, tspan[ i ], p_nv_dat, out_mem );
-        printf( "Integration progressed to t = %.2e \n", tret );
     }
 
     N_VDestroy( p_nv );
