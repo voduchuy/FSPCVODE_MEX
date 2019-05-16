@@ -8,7 +8,7 @@ set(SOLVER_LIBS FspCvode FspCvodeForwardSens
         )
 
 set(MEX_LIBS
-        FspCvodeMex FspSensCVodeMex
+        FspCVodeMex FspSensCVodeMex
         )
 
 set(TEST_PROGRAMS
