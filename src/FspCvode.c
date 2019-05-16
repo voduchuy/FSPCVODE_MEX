@@ -92,11 +92,17 @@ int FspCVode( int n_tspan, double t_init, double *tspan, int n_state, double *p0
     /* Advance to the end, output vectors at times specified in tspan */
     double tret;
     double tnow = t_init;
+    double tfinal = tspan[n_tspan-1];
     int istop = 0;
     int iout = 0;
-    while ( tnow < tspan[ n_tspan-1 ] ) {
-        cvode_stat = CVode( cvode_mem, tspan[ n_tspan-1 ], p_nv, &tret, CV_ONE_STEP );
+    while ( tnow < tfinal ) {
+        cvode_stat = CVode( cvode_mem, tfinal, p_nv, &tret, CV_ONE_STEP );
         CVODECHKERR( cvode_stat );
+        if (tret > tfinal){
+            tret = tfinal;
+            cvode_stat = CVodeGetDky( cvode_mem, tfinal, 0, p_nv);
+            CVODECHKERR(cvode_stat);
+        }
 
         /* Check if we have to terminate early */
         if (stop_fun != NULL){
