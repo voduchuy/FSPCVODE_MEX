@@ -267,8 +267,10 @@ void mex_dmatvec(int n_state, int i_par, double t, double *x, double *y, void *u
 
 /* Mex Function to evaluate a generic function of the CME solution and sensitivities
  * This function should be called in Matlab with the following syntax
- *       [y_out, stop_status] = FSPSensCVodeSolve(t_out, Av, dAv, p0, dp0, f_out, f_stop, stop_cond)
+ *       [y_out, stop_status] = FSPSensCVodeSolve(t_start, t_out, Av, dAv, p0, dp0, f_out, f_stop, stop_cond)
  * where
+ *
+ * t_start : initial time.
  *
  * t_out : vector of output times.
  *
@@ -301,33 +303,37 @@ mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray	*prhs[])
         mexErrMsgIdAndTxt( "MATLAB:FSPSensCVodeSolve",
                 "Not enough outputs.");
     }
-    if (nrhs != 8){
+    if (nrhs != 9){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
                 "Not enough inputs.");
     }
     if (!mxIsClass(prhs[0], "double")){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
-                "Input timespan must be of class double.");
+                "Input t_start must be of class double.");
     }
-    if (!mxIsClass(prhs[1], "function_handle")){
+    if (!mxIsClass(prhs[1], "double")){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
-                "Second argument must be a function handle.");
+                          "Input tspan must be of class double.");
     }
-    if (!mxIsClass(prhs[2], "cell")){
+    if (!mxIsClass(prhs[2], "function_handle")){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
-                "Third argument must be a cell of function handles.");
+                "Third argument must be a function handle.");
     }
-    if (!mxIsClass(prhs[3], "double")){
+    if (!mxIsClass(prhs[3], "cell")){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
-                "Fourth argument must be a column vector of double type.");
+                "Fourth argument must be a cell of function handles.");
     }
     if (!mxIsClass(prhs[4], "double")){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
                 "Fifth argument must be a column vector of double type.");
     }
-    if (!mxIsClass(prhs[5], "function_handle")){
+    if (!mxIsClass(prhs[5], "double")){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
-                "Sixth argument must be a function handle.");
+                "Sixth argument must be a column vector of double type.");
+    }
+    if (!mxIsClass(prhs[6], "function_handle")){
+        mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
+                "Seventh argument must be a function handle.");
     }
     size_t n_tspan = mxGetNumberOfElements(prhs[0]);
     size_t n_par = mxGetNumberOfElements(prhs[2]);
@@ -342,23 +348,27 @@ mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray	*prhs[])
     struct mv_ml_dat mv_dat;
     struct dmv_ml_dat dmv_dat;
     
-    CreateFOutData(&fout_dat, plhs[0], prhs[5], n_par, n_state);
-    CreateMVData(&mv_dat, prhs[1], n_state);
-    CreateDMVData(&dmv_dat, prhs[2], n_par, n_state);
-    CreateFStopData(&fstop_dat, prhs[7], prhs[6], n_state);
+    CreateFOutData(&fout_dat, plhs[0], prhs[6], n_par, n_state);
+    CreateMVData(&mv_dat, prhs[2], n_state);
+    CreateDMVData(&dmv_dat, prhs[3], n_par, n_state);
+    CreateFStopData(&fstop_dat, prhs[8], prhs[7], n_state);
     
     double* p0_ptr;
     double* dp0_ptr;
+    double* t_start;
     double* tspan;
-    p0_ptr = (double*)mxGetPr(prhs[3]);
-    dp0_ptr = (double*)mxGetPr(prhs[4]);
-    tspan = (double*)mxGetPr(prhs[0]);
+    p0_ptr = (double*)mxGetPr(prhs[4]);
+    dp0_ptr = (double*)mxGetPr(prhs[5]);
+    t_start = mxGetDoubles(prhs[0]);
+    tspan = (double*)mxGetPr(prhs[1]);
     
-    printf("Calling ODE solver...\n");
-    int ierr = FspCVodeForwardSens(n_tspan, tspan, n_state, n_par, p0_ptr, dp0_ptr, &mex_matvec, (void*) &mv_dat,
-            &mex_dmatvec, (void*) &dmv_dat, &mex_out_fun, (void*) &fout_dat, &mex_stop_fun, (void*) &fstop_dat);
-    printf("Returning from ODE solver...Error code = %d\n", ierr);
-
+    int ierr = FspCVodeForwardSens( n_tspan, *t_start, tspan, n_state, n_par, p0_ptr, dp0_ptr, &mex_matvec, ( void * ) &mv_dat,
+                                    &mex_dmatvec, ( void * ) &dmv_dat, &mex_out_fun, ( void * ) &fout_dat,
+                                    &mex_stop_fun, ( void * ) &fstop_dat );
+    if (ierr != 0){
+        mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
+                          "CVode gives error status %d \n.", ierr);
+    }
     plhs[1] = mxDuplicateArray(fstop_dat.stop_status);
 
     DestroyDMVData(&dmv_dat);

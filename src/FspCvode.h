@@ -58,7 +58,17 @@ int CMEJacVecFun( N_Vector v, N_Vector Jv, double t, N_Vector y, N_Vector fy, vo
 This function is intended for solution and forward sensitivity analysis of ODEs systems of the form
 p'(t) = A(t, theta)p(t)
 p(0) = p0(theta)
-where the functions to evaluate the Jacobian action and the partial derivatives wrt sensitivity parameters are given from Matlab.
+assuming that the initial time is 0.
 */
-int FspCVode( int n_tspan, double *tspan, int n_state, double *p0, matvecfun matvec, void *matvecdat, outputfun out_fun,
+int FspCVodeFromTimeZero( int n_tspan, double *tspan, int n_state, double *p0, matvecfun matvec, void *matvecdat,
+                          outputfun out_fun,
+                          void *out_mem, stoppingfun stop_fun, void *stop_mem );
+
+/*
+This function is intended for solution and forward sensitivity analysis of ODEs systems of the form
+p'(t) = A(t, theta)p(t)
+p(0) = p0(theta)
+with a non-zero initial time.
+*/
+int FspCVode( int n_tspan, double t_init, double *tspan, int n_state, double *p0, matvecfun matvec, void *matvecdat, outputfun out_fun,
               void *out_mem, stoppingfun stop_fun, void *stop_mem );

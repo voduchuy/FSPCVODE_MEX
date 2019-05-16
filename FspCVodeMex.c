@@ -213,8 +213,11 @@ void mex_matvec(int n_state, double t, double *x, double *y, void *user_data){
 
 /* Mex Function to evaluate a generic function of the CME solution
  * This function should be called in Matlab with the following syntax
- *      [y_out, stop_status] = FSPCVodeMex(t_out, Av, p0, f_out, f_stop, stop_cond)
+ *      [y_out, stop_status] = FSPCVodeMex(t_start, t_out, Av, p0, f_out, f_stop, stop_cond)
  * where
+ *
+ * t_start : initial time.
+ *
  * t_out : vector of output times.
  *
  * Av : function handle to evaluate action of the (possibly time-dependent) CME matrix, callable in the form y = Av(t, x).
@@ -240,57 +243,69 @@ mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray	*prhs[])
         mexErrMsgIdAndTxt( "MATLAB:FSPSensCVodeSolve",
                 "Not enough outputs.");
     }
-    if (nrhs != 6){
+    if (nrhs != 7){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
                 "Not enough inputs, need six.");
     }
     if (!mxIsClass(prhs[0], "double")){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
+                          "Input starting time must be of class double.");
+    }
+    if (!mxIsClass(prhs[1], "double")){
+        mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
                 "Input timespan must be of class double.");
     }
-    if (!mxIsClass(prhs[1], "function_handle")){
+    if (!mxIsClass(prhs[2], "function_handle")){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
-                "Second argument must be a function handle.");
+                "Third argument must be a function handle.");
     }
-    if (!mxIsClass(prhs[2], "double")){
+    if (!mxIsClass(prhs[3], "double")){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
                 "Fourth argument must be a column vector of double type.");
-    }
-    if (!mxIsClass(prhs[3], "function_handle")){
-        mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
-                "Fourth argument must be a function handle.");
     }
     if (!mxIsClass(prhs[4], "function_handle")){
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
                 "Fifth argument must be a function handle.");
     }
-    size_t n_tspan = mxGetNumberOfElements(prhs[0]);
-    size_t n_state = mxGetNumberOfElements(prhs[2]);
+    if (!mxIsClass(prhs[5], "function_handle")){
+        mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
+                "Sixth argument must be a function handle.");
+    }
+    size_t n_tspan = mxGetNumberOfElements(prhs[1]);
+    size_t n_state = mxGetNumberOfElements(prhs[3]);
     plhs[0] = mxCreateCellMatrix(n_tspan, 1);
 
     struct f_out_ml_dat fout_dat;
     struct f_stop_ml_dat fstop_dat;
     struct mv_ml_dat mv_dat;
 
-    CreateFOutData(&fout_dat, plhs[0], prhs[3], n_state);
-    CreateFStopData(&fstop_dat, prhs[5], prhs[4], n_state);
-    CreateMVData(&mv_dat, prhs[1], n_state);
+    CreateFOutData(&fout_dat, plhs[0], prhs[4], n_state);
+    CreateFStopData(&fstop_dat, prhs[6], prhs[5], n_state);
+    CreateMVData(&mv_dat, prhs[2], n_state);
 
     double* p0_ptr;
     double* tspan;
-    p0_ptr = (double*)mxGetPr(prhs[2]);
-    tspan = (double*)mxGetPr(prhs[0]);
+    double* t_start;
+    p0_ptr = (double*)mxGetPr(prhs[3]);
+    t_start = mxGetDoubles(prhs[0]);
+    tspan = (double*)mxGetPr(prhs[1]);
     
 //     printf("Evaluating for %d time points with %d states.\n",
 //             n_tspan, n_state);
 //     
 //     printf("Calling ODE solver...\n");
-    int ierr = FspCVode( n_tspan, tspan, n_state, p0_ptr, &mex_matvec, (void*) &mv_dat, &mex_out_fun, (void*) &fout_dat, &mex_stop_fun, (void*) &fstop_dat);
+    int ierr = FspCVode( n_tspan, *t_start, tspan, n_state, p0_ptr, &mex_matvec, ( void * ) &mv_dat, &mex_out_fun,
+                                     ( void * ) &fout_dat, &mex_stop_fun, ( void * ) &fstop_dat );
 //     printf("Returning from ODE solver...Error code = %d\n", ierr);
-// 
+//
 //     printf("Matvec time: %.2e \n", mv_dat.cput );
 //     printf("FOut time: %.2e \n", fout_dat.cput);
 //     printf("FStop time %.2e \n", fstop_dat.cput);
+
+    if (ierr != 0){
+        mexErrMsgIdAndTxt("MATLAB:FSPCVodeMex",
+                          "CVode gives error status %d \n.", ierr);
+    }
 
     plhs[1] = mxDuplicateArray(fstop_dat.stop_status);
 

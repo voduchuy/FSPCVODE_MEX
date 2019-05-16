@@ -12,6 +12,7 @@ set(MEX_LIBS
         )
 
 set(TEST_PROGRAMS
+        test_cvode_fsp
         test_cvodes_fsp
         )
 

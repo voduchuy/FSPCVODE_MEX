@@ -38,7 +38,7 @@ int main(){
 
     tspan[0] = 2.0;
 
-    FspCVodeForwardSens( 1, tspan, n_max, 1, p0, dp0, &matvec, NULL, &dmatvec,NULL, &out_fun, NULL, NULL, NULL);
+    FspCVodeForwardSens( 1, 0.0, tspan, n_max, 1, p0, dp0, &matvec, NULL, &dmatvec, NULL, &out_fun, NULL, NULL, NULL);
 
     free(tspan);
     free(p0);
