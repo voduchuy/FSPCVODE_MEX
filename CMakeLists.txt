@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
 PROJECT(FSP_CVODE_MEX)
 
@@ -38,6 +38,7 @@ endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 FIND_PACKAGE(Threads REQUIRED)
+FIND_PACKAGE(MATLAB REQUIRED)
 
 # Set the directory to put our compiled files
 set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR})
@@ -60,14 +61,13 @@ foreach( LIB ${SOLVER_LIBS})
     target_link_libraries(${LIB} ${EXT_LIBRARIES})
 endforeach()
 
-foreach( LIB ${MEX_LIBS})
-    add_library(${LIB} ${CMAKE_SOURCE_DIR}/${LIB}.c )
-    target_link_libraries(${LIB} ${EXT_LIBRARIES} ${SOLVER_LIBS})
-endforeach()
-
 foreach ( PROG ${TEST_PROGRAMS})
     add_executable(${PROG} ${CMAKE_SOURCE_DIR}/test/${PROG}.c)
     target_link_libraries(${PROG} ${SOLVER_LIBS} ${EXT_LIBRARIES})
+endforeach()
+
+foreach( LIB ${MEX_LIBS})
+    matlab_add_mex(NAME ${LIB} SRC ${CMAKE_SOURCE_DIR}/${LIB}.c LINK_TO ${EXT_LIBRARIES} ${SOLVER_LIBS} R2018a)
 endforeach()
 
 
