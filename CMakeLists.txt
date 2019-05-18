@@ -1,5 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
-
+CMAKE_MINIMUM_REQUIRED(VERSION 3.14)
 PROJECT(FSP_CVODE_MEX)
 
 option(USE_OPENMP "allow the libraries to use OpenMP (Note: Sundials must be compiled with OpenMP support!)" OFF)
@@ -41,20 +40,20 @@ FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(MATLAB REQUIRED)
 
 # Set the directory to put our compiled files
-set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR})
+set(CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 
 # Where to put .a files (archive for static libraries)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # Where to put .so files (dynamic libraries)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
 # Where to put the executable files
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Set the folders to include
 include_directories(${CMAKE_SOURCE_DIR}/src)
-include_directories(/Applications/MATLAB_R2018b.app/extern/include)
+link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 
 foreach( LIB ${SOLVER_LIBS})
     add_library(${LIB} SHARED ${CMAKE_SOURCE_DIR}/src/${LIB}.c ${CMAKE_SOURCE_DIR}/src/${LIB}.h)
