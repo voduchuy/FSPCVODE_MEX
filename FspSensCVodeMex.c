@@ -276,7 +276,7 @@ void mex_dmatvec(int n_state, int i_par, double t, double *x, double *y, void *u
  *
  * Av : function handle to evaluate action of the (possibly time-dependent) CME matrix, callable in the form y = Av(t, x).
  *
- * dAv : function handle to evaluate action of the partial derivative of the CME matrix, callable in the form y = dAv(t, i, x)
+ * dAv : cell of function handles to evaluate action of the partial derivative of the CME matrix, callable in the form y = dAv{i}(t, x)
  *where i is the index of the parameter with respect to which the partial derivative is taken.
  *
  * p0 : column vector of the initial probability vector.
@@ -335,9 +335,9 @@ mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray	*prhs[])
         mexErrMsgIdAndTxt("MATLAB:FSPSensCVodeSolve",
                 "Seventh argument must be a function handle.");
     }
-    size_t n_tspan = mxGetNumberOfElements(prhs[0]);
-    size_t n_par = mxGetNumberOfElements(prhs[2]);
-    size_t n_state = mxGetNumberOfElements(prhs[3]);
+    size_t n_tspan = mxGetNumberOfElements(prhs[1]);    
+    size_t n_state = mxGetNumberOfElements(prhs[4]);
+    size_t n_par = mxGetNumberOfElements(prhs[5])/n_state;
     plhs[0] = mxCreateCellMatrix(n_tspan, 1);
     
     printf("Evaluating for %d time points with %d sensitivity parameters and %d states.\n",
